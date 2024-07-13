@@ -1,0 +1,100 @@
+
+/* General styles */
+.auth-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  .auth-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .auth-container form div {
+    margin-bottom: 15px;
+  }
+  
+  .auth-container label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .auth-container input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  /* Sidebar styles */
+  .sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #343a40;
+    color: #fff;
+    padding-top: 20px;
+    z-index: 1000; /* Ensure the sidebar is on top */
+  }
+  
+  .sidebar-header {
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    background-color: #007bff;
+  }
+  
+  .sidebar-menu {
+    margin-top: 20px;
+  }
+  
+  .nav-link {
+    color: #fff;
+    padding: 10px 20px;
+    display: block;
+    transition: background-color 0.3s;
+  }
+  
+  .nav-link:hover {
+    background-color: #007bff;
+    text-decoration: none;
+  }
+  
+  .nav-item {
+    margin-bottom: 10px;
+    color: #fff;
+  }
+  
+  .nav-item .nav-link.active {
+    background-color: #f3f6f8;
+    color: #fff;
+  }
+  
+  /* Main content styles */
+  .main-content {
+    margin-left: 250px; /* Same as sidebar width */
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh; /* Ensures it covers the full viewport height */
+    overflow: auto; /* To handle overflow content */
+  }
+  
+  @media (max-width: 991px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+  
+    .main-content {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+  

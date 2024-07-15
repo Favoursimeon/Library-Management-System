@@ -12,21 +12,49 @@ const Login = ({ setIsAuthenticated }) => {
   console.log(email);
   console.log(password);  
 
-  const handleLogin = (e) => {
+  // const handleLogin = (e) => {
+  //   e.preventDefault();
+  //   // Placeholder authentication logic
+  //   if (email === 'favour@gmail.com' && password === 'Admin123') {
+  //     setIsAuthenticated(true);
+  //     navigate('/dashboard');
+  //   } else {
+  //     alert('Invalid credentials');
+  //   }
+  // };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Placeholder authentication logic
-    if (email === 'favour@gmail.com' && password === 'Admin123') {
-      setIsAuthenticated(true);
-      navigate('/dashboard');
-    } else {
-      alert('Invalid credentials');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        setIsAuthenticated(true);
+        navigate('/dashboard');
+      } else {
+        alert('Invalid credentials');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred');
     }
   };
+  
 
   return (
     <div className='Form'>
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
+
+        <label> Email
        <input
           type="email"
           placeholder="Email"
@@ -34,9 +62,11 @@ const Login = ({ setIsAuthenticated }) => {
           onChange={(e) => setEmail(e.target.value)}
           label="Email"
         /> 
+        </label>
         <p id = "emailnote" className={email}>
           <fontAwesomeIcon icon={faInfoCircle}/>
         </p>
+        <label> Password
         <input
           type="password"
           placeholder="Password"
@@ -44,6 +74,7 @@ const Login = ({ setIsAuthenticated }) => {
           onChange={(e) => setPassword(e.target.value)}
           label="Password"
         />
+        </label>
 
 <p id = "pwdnote" className={password && email}>
                             <fontAwesomeIcon icon={faInfoCircle}/>

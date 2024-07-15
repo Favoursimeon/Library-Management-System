@@ -1,28 +1,18 @@
 const express = require('express');
-const path = require('path');
-const cors = require('cors');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-
-
+const cors = require('cors');
+const authRoutes = require('./server/routes/authRoutes');
+const db = require('./server/config/db');
 
 const app = express();
-const port = 5000;
-const mysql = require('mysql');
-const con = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'Library'
-});
 
-app.use(express.json())
-app.use(express.urlencoded({ extended : false }))
+app.use(cors());
+app.use(bodyParser.json());
 
-// app.use('/api/auth/login', require('./routes/login'));
-// app.use('/api/auth/register', require('./routes/register'));
-// // Define your routes here
+app.use('/api/auth', authRoutes);
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

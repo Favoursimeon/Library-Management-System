@@ -15,13 +15,13 @@ const Sidebar = () => {
             <Link to="/dashboard" style={{ color: '#fff', fontSize:'large' }} className="nav-link" >Dashboard</Link>
           </li>
           <li className="nav-item">
+            <Link to="/Reservations" style={{ color: '#fff', fontSize:'large' }} className="nav-link">Reservations</Link>
+          </li>
+          <li className="nav-item">
             <Link to="/Books" style={{ color: '#fff', fontSize:'large' }} className="nav-link">Books</Link>
           </li>
           <li className="nav-item">
             <Link to="/Members" style={{ color: '#fff', fontSize:'large' }} className="nav-link">Members</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/Reservations" style={{ color: '#fff', fontSize:'large' }} className="nav-link">Reservations</Link>
           </li>
           <li className="nav-item">
             <Link to="/Settings" style={{ color: '#fff', fontSize:'large' }} className="nav-link">Settings</Link>

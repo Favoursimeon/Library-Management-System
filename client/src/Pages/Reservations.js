@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Modal from 'react-modal';
 import Sidebar from './Sidebar';
@@ -8,55 +9,77 @@ import './Reservations.css';
 Modal.setAppElement('#root');
 
 const Reservations = () => {
-  const [lendBooks, setLendBooks] = useState([
-    {
-      // member: 'John Doe',
-      // bookTitle: 'Book 1',
-      // author: 'Author 1',
-      // issueDate: '2023-07-01',
-      // returnDate: '2023-07-10',
-      // price: '$10',
-    },
-    // Add more books here
-  ]);
-
-  const [returnedBooks, setReturnedBooks] = useState([
-    {
-      // member: 'Jane Smith',
-      // bookTitle: 'Book 2',
-      // author: 'Author 2',
-      // issueDate: '2023-06-01',
-      // elapse: '30 days',
-      // returnDate: '2023-07-01',
-      // fine: '$5',
-    },
-    // Add more books here
-  ]);
-
+  const [lendBooks, setLendBooks] = useState([]);
+  const [returnedBooks, setReturnedBooks] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newBook, setNewBook] = useState({
     member: '',
-    bookTitle: '',
-    author: '',
+    booktittle: '',
+    Author: '',
     issueDate: '',
     returnDate: '',
     price: '',
   });
   const [currentEditIndex, setCurrentEditIndex] = useState(null);
 
-  const handleReturn = (index) => {
+  useEffect(() => {
+    fetchLendBooks();
+    fetchReturnedBooks();
+  }, []);
+
+  const fetchLendBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/books/lendBooks');
+      if (Array.isArray(response.data)) {
+        setLendBooks(response.data);
+      } else {
+        console.error('Unexpected response data:', response.data);
+        setLendBooks([]);
+      }
+    } catch (error) {
+      console.error('Error fetching lend books:', error);
+      setLendBooks([]);
+    }
+  };
+
+  const fetchReturnedBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/books/returnedBooks');
+      if (Array.isArray(response.data)) {
+        setReturnedBooks(response.data);
+      } else {
+        console.error('Unexpected response data:', response.data);
+        setReturnedBooks([]);
+      }
+    } catch (error) {
+      console.error('Error fetching returned books:', error);
+      setReturnedBooks([]);
+    }
+  };
+
+  const handleReturn = async (index) => {
     const bookToReturn = lendBooks[index];
     const elapse = calculateElapse(bookToReturn.issueDate, bookToReturn.returnDate);
     const fine = calculateFine(elapse);
 
+    try {
+      await axios.post('http://localhost:5000/api/books/returnedBooks', {
+        ...bookToReturn,
+        elapse,
+        fine,
+      });
+      await axios.delete(`http://localhost:5000/api/books/lendBooks/${bookToReturn.id}`);
+      fetchLendBooks();
+      fetchReturnedBooks();
+    } catch (error) {
+      console.error('Error returning book:', error);
+    }
+
     const updatedLendBooks = lendBooks.filter((_, i) => i !== index);
     setLendBooks(updatedLendBooks);
 
-    setReturnedBooks([
-      ...returnedBooks,
-      { ...bookToReturn, elapse, fine }
-    ]);
+    setReturnedBooks([...returnedBooks, { ...bookToReturn, elapse, fine }]);
   };
 
   const handleEdit = (index) => {
@@ -65,9 +88,17 @@ const Reservations = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     const updatedLendBooks = lendBooks.filter((_, i) => i !== index);
+    const bookToDelete = lendBooks[index];
     setLendBooks(updatedLendBooks);
+
+    try {
+      await axios.delete(`http://localhost:5000/api/books/lendBooks/${bookToDelete.id}`);
+      fetchLendBooks();
+    } catch (error) {
+      console.error('Error deleting book:', error);
+    }
   };
 
   const calculateElapse = (issueDate, returnDate) => {
@@ -80,6 +111,7 @@ const Reservations = () => {
   const calculateFine = (elapse) => {
     const days = parseInt(elapse.split(' ')[0], 10);
     return days > 30 ? `$${(days - 30) * 1}` : '$0'; // fine calculation
+
   };
 
   const openAddModal = () => {
@@ -99,22 +131,58 @@ const Reservations = () => {
     setNewBook({ ...newBook, [name]: value });
   };
 
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    setLendBooks([...lendBooks, newBook]);
-    setNewBook({
-      // member: '',
-      // bookTitle: '',
-      // author: '',
-      // issueDate: '',
-      // returnDate: '',
-      // price: '',
-    });
-    closeAddModal();
-  };
 
-  const handleEditSubmit = (e) => {
+  const formatDate = (date) => {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+  
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+  
+    return [year, month, day].join('-');
+  };
+  
+
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/api/books/lendBooks', {
+        member: newBook.member,
+        booktittle: newBook.booktittle,
+        Author: newBook.Author,
+        issueDate: formatDate(newBook.issueDate),
+        returnDate: formatDate(newBook.returnDate),
+        price: newBook.price,
+      });
+      fetchLendBooks();
+      setNewBook({
+        member: '',
+        booktittle: '',
+        Author: '',
+        issueDate: '',
+        returnDate: '',
+        price: '',
+      });
+      closeAddModal();
+    } catch (error) {
+      console.error('Error adding book:', error.response ? error.response.data : error.message);
+    }
+  };
+  
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await axios.put(`http://localhost:5000/api/books/lendBooks/${newBook.id}`, newBook);
+      fetchLendBooks();
+      closeEditModal();
+    } catch (error) {
+      console.error('Error editing book:', error);
+    }
+
     const updatedLendBooks = lendBooks.map((book, i) =>
       i === currentEditIndex ? newBook : book
     );
@@ -150,17 +218,17 @@ const Reservations = () => {
               {lendBooks.map((book, index) => (
                 <tr key={index}>
                   <td>{book.member}</td>
-                  <td>{book.bookTitle}</td>
-                  <td>{book.author}</td>
+                  <td>{book.booktittle}</td>
+                  <td>{book.Author}</td>
                   <td>{book.issueDate}</td>
                   <td>{book.returnDate}</td>
                   <td>{book.price}</td>
                   <td>
                     <button onClick={() => handleReturn(index)}>Return</button>
                     <button onClick={() => handleEdit(index)}>Edit</button>
-                    <button 
-                    variant="danger"
-                    onClick={() => handleDelete(index)}>Delete</button>
+                    <button variant="danger" onClick={() => handleDelete(index)}>
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -186,8 +254,8 @@ const Reservations = () => {
               {returnedBooks.map((book, index) => (
                 <tr key={index}>
                   <td>{book.member}</td>
-                  <td>{book.bookTitle}</td>
-                  <td>{book.author}</td>
+                  <td>{book.booktittle}</td>
+                  <td>{book.Author}</td>
                   <td>{book.issueDate}</td>
                   <td>{book.elapse}</td>
                   <td>{book.returnDate}</td>
@@ -222,8 +290,8 @@ const Reservations = () => {
             Book Title:
             <input
               type="text"
-              name="bookTitle"
-              value={newBook.bookTitle}
+              name="booktittle"
+              value={newBook.booktittle}
               onChange={handleChange}
               required
             />
@@ -232,8 +300,8 @@ const Reservations = () => {
             Author:
             <input
               type="text"
-              name="author"
-              value={newBook.author}
+              name="Author"
+              value={newBook.Author}
               onChange={handleChange}
               required
             />
@@ -261,15 +329,15 @@ const Reservations = () => {
           <label>
             Price:
             <input
-              type="Currency"
+              type="text"
               name="price"
               value={newBook.price}
               onChange={handleChange}
               required
             />
           </label>
-          <button type="submit">Add</button>
-          <button type="button" onClick={closeAddModal}>Cancel</button>
+          <button type="submit">Add Book</button>
+          <button onClick={closeAddModal}>Cancel</button>
         </form>
       </Modal>
 
@@ -296,8 +364,8 @@ const Reservations = () => {
             Book Title:
             <input
               type="text"
-              name="bookTitle"
-              value={newBook.bookTitle}
+              name="booktittle"
+              value={newBook.booktittle}
               onChange={handleChange}
               required
             />
@@ -306,8 +374,8 @@ const Reservations = () => {
             Author:
             <input
               type="text"
-              name="author"
-              value={newBook.author}
+              name="Author"
+              value={newBook.Author}
               onChange={handleChange}
               required
             />
@@ -335,15 +403,15 @@ const Reservations = () => {
           <label>
             Price:
             <input
-              type="Currency"
+              type="text"
               name="price"
               value={newBook.price}
               onChange={handleChange}
               required
             />
           </label>
-          <button type="submit">Edit Book</button>
-          <button type="button" onClick={closeEditModal}>Cancel</button>
+          <button type="submit">Update Book</button>
+          <button onClick={closeEditModal}>Cancel</button>
         </form>
       </Modal>
     </div>

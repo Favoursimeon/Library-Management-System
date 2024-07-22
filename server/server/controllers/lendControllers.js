@@ -1,7 +1,19 @@
-const Reservations = require('../models/reservations');
+const Reservation = require('../models/reservations');
 
+exports.getLendBooks = (req, res) => {
+  Reservation.getLendBooks((err, lendBooks) => {
+    if (err) res.status(500).json({ error: err.message });
+    res.json(lendBooks);
+  });
+};
+
+exports.getReturnedBooks = (req, res) => {
+  Reservation.getReturnedBooks((err, returnedBooks) => {
+    if (err) res.status(500).json({ error: err.message });
+    res.json(returnedBooks);
+  });
+};
 const formatDate = (date) => {
-  if (!date) return null; // Handle null or undefined dates
   const d = new Date(date);
   let month = '' + (d.getMonth() + 1);
   let day = '' + d.getDate();
@@ -10,93 +22,77 @@ const formatDate = (date) => {
   if (month.length < 2) month = '0' + month;
   if (day.length < 2) day = '0' + day;
 
-  return [year, month, day].join('-');
+  return [month, day, year].join('-');
 };
 
-const getLendBooks = (req, res) => {
-  Reservations.getLendBooks((err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
+exports.addLendBook = (req, res) => {
+  const newBook = req.body;
+  newBook.issueDate = formatDate(newBook.issueDate);
+  newBook.returnDate = formatDate(newBook.returnDate);
+  Reservation.addLendBook(newBook, (err, id) => {
+    if (err) res.status(500).json({ error: err.message });
+    res.json({ id, ...newBook });
   });
 };
 
-const getReturnedBooks = (req, res) => {
-  Reservations.getReturnedBooks((err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
+
+exports.returnBook = (req, res) => {
+  const book = req.body;
+  book.issueDate = formatDate(book.issueDate);
+  book.returnDate = formatDate(book.returnDate);
+  Reservation.returnBook(book, (err, id) => {
+    if (err) res.status(500).json({ error: err.message });
+    res.json({ id, ...book });
   });
 };
 
-const addLendBook = (req, res) => {
-  const newBook = {
-    member: req.body.member,
-    booktittle: req.body.booktittle, 
-    Author: req.body.Author, 
-    issueDate: formatDate(req.body.issueDate),
-    returnDate: formatDate(req.body.returnDate),
-    price: req.body.price,
+
+exports.deleteLendBook = (req, res) => {
+  const { id } = req.params;
+  
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid ID provided' });
+  }
+
+  Reservation.deleteLendBook = (id, callback) => {
+    const sql = 'DELETE FROM lendBooks WHERE id = ?';
+    db.query(sql, [id], (err, result) => {
+      if (err) return callback(err);
+      callback(null, result.affectedRows);
+    });
   };
+  
+};
 
-  Reservations.addLendBook(newBook, (err, results) => {
-    if (err) {
-      console.error('Error adding lend book:', err);
-      return res.status(500).json({ error: err.message });
-    }
-    res.status(201).json({ id: results.insertId, ...newBook });
+// exports.updateLendBook = (req, res) => {
+//   const { id } = req.params;
+//   const updatedBook = req.body;
+  
+//   Reservation.updateLendBook(id, updatedBook, (err, affectedRows) => {
+//     if (err) res.status(500).json({ error: err.message });
+//     res.json({ affectedRows });
+//   });
+// };
+
+exports.updateLendBook = (req, res) => {
+  const { id } = req.params;
+  const updatedBook = req.body;
+
+  // Validate ID
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid ID provided' });
+  }
+
+  // Validate updatedBook data
+  if (!updatedBook.member || !updatedBook.booktittle || !updatedBook.Author ||
+      !updatedBook.issueDate || !updatedBook.returnDate || !updatedBook.price) {
+    return res.status(400).json({ error: 'Incomplete data provided' });
+  }
+
+  Reservation.updateLendBook(id, updatedBook, (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Book not found' });
+    res.json({ message: 'Book updated successfully' });
   });
 };
 
-const returnBook = (req, res) => {
-  const bookId = req.params.id;
-  const returnedBook = {
-    ...req.body,
-    issueDate: formatDate(req.body.issueDate),
-    returnDate: formatDate(req.body.returnDate),
-  };
-
-  Reservations.returnBook(bookId, returnedBook, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
-};
-
-const deleteLendBook = (req, res) => {
-  const bookId = req.params.id;
-  Reservations.deleteLendBook(bookId, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
-};
-
-const updateLendBook = (req, res) => {
-  const bookId = req.params.id;
-  const updatedBook = {
-    ...req.body,
-    issueDate: formatDate(req.body.issueDate),
-    returnDate: formatDate(req.body.returnDate),
-  };
-
-  Reservations.updateLendBook(bookId, updatedBook, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
-};
-
-module.exports = {
-  getLendBooks,
-  getReturnedBooks,
-  addLendBook,
-  returnBook,
-  deleteLendBook,
-  updateLendBook,
-};

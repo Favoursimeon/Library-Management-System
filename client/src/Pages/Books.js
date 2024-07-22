@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Sidebar from './Sidebar';
@@ -8,7 +8,7 @@ const Books = () => {
   const [books, setBooks] = useState([]);
   const [show, setShow] = useState(false);
   const [newBook, setNewBook] = useState({
-    title: '',
+    tittle: '',
     author: '',
     producer: '',
     price: '',
@@ -17,6 +17,20 @@ const Books = () => {
     purchaseDate: '',
     genre: ''
   });
+
+  const fetchBooks = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/books/bookTable');
+      const data = await response.json();
+      setBooks(data);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -29,31 +43,57 @@ const Books = () => {
     });
   };
 
-  const handleAddBook = () => {
-    setBooks([...books, newBook]);
-    setNewBook({
-      title: '',
-      author: '',
-      producer: '',
-      price: '',
-      quantity: '',
-      category: '',
-      purchaseDate: '',
-      genre: ''
-    });
-    handleClose();
+  const handleAddBook = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/books/bookTable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newBook)
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error adding book:', errorData);
+        throw new Error('Network response was not ok');
+      }
+  
+      fetchBooks();
+      setNewBook({
+        tittle: '',
+        author: '',
+        producer: '',
+        price: '',
+        quantity: '',
+        category: '',
+        purchaseDate: '',
+        genre: ''
+      });
+      handleClose();
+    } catch (error) {
+      console.error('Error adding book:', error);
+    }
   };
+  
+  
 
-  const handleDeleteBook = (index) => {
-    const newBooks = books.filter((book, i) => i !== index);
-    setBooks(newBooks);
+  const handleDeleteBook = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/books/bookTable/${id}`, {
+        method: 'DELETE'
+      });
+      fetchBooks();
+    } catch (error) {
+      console.error('Error deleting book:', error);
+    }
   };
 
   const handleEditBook = (index) => {
     const bookToEdit = books[index];
     setNewBook(bookToEdit);
     handleShow();
-    handleDeleteBook(index);
+    handleDeleteBook(bookToEdit.id);
   };
 
   return (
@@ -68,7 +108,7 @@ const Books = () => {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>Title</th>
+              <th>Tittle</th>
               <th>Author</th>
               <th>Producer</th>
               <th>Price</th>
@@ -82,7 +122,7 @@ const Books = () => {
           <tbody>
             {books.map((book, index) => (
               <tr key={index}>
-                <td>{book.title}</td>
+                <td>{book.tittle}</td>
                 <td>{book.author}</td>
                 <td>{book.producer}</td>
                 <td>{book.price}</td>
@@ -98,8 +138,7 @@ const Books = () => {
                   </Button>{' '}
                   <Button
                     variant="danger"
-                    onClick={() => handleDeleteBook(index)}
-                    
+                    onClick={() => handleDeleteBook(book.id)}
                   >
                     Delete
                   </Button>
@@ -116,12 +155,12 @@ const Books = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group controlId="formTitle">
-              <Form.Label>Title</Form.Label>
+            <Form.Group controlId="formtittle">
+              <Form.Label>Tittle</Form.Label>
               <Form.Control
                 type="text"
-                name="title"
-                value={newBook.title}
+                name="tittle"
+                value={newBook.tittle}
                 onChange={handleChange}
               />
             </Form.Group>

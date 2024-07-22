@@ -88,18 +88,30 @@ const Reservations = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (index) => {
-    const updatedLendBooks = lendBooks.filter((_, i) => i !== index);
-    const bookToDelete = lendBooks[index];
-    setLendBooks(updatedLendBooks);
+  // const handleDelete = async (index) => {
+  //   const updatedLendBooks = lendBooks.filter((_, i) => i !== index);
+  //   const bookToDelete = lendBooks[index];
+  //   setLendBooks(updatedLendBooks);
 
+  //   try {
+  //     await axios.delete(`http://localhost:5000/api/books/lendBooks/${bookToDelete.id}`);
+  //     fetchLendBooks();
+  //   } catch (error) {
+  //     console.error('Error deleting book:', error);
+  //   }
+  // };
+
+  const handleDelete = async (index) => {
+    const bookToDelete = lendBooks[index];
+    
     try {
       await axios.delete(`http://localhost:5000/api/books/lendBooks/${bookToDelete.id}`);
-      fetchLendBooks();
+      fetchLendBooks(); // Refresh the list after deletion
     } catch (error) {
       console.error('Error deleting book:', error);
     }
   };
+  
 
   const calculateElapse = (issueDate, returnDate) => {
     const issue = new Date(issueDate);
@@ -172,23 +184,44 @@ const Reservations = () => {
   };
   
 
+  // const handleEditSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     await axios.put(`http://localhost:5000/api/books/lendBooks/${newBook.id}`, newBook);
+  //     fetchLendBooks();
+  //     closeEditModal();
+  //   } catch (error) {
+  //     console.error('Error editing book:', error);
+  //   }
+
+  //   const updatedLendBooks = lendBooks.map((book, i) =>
+  //     i === currentEditIndex ? newBook : book
+  //   );
+  //   setLendBooks(updatedLendBooks);
+  //   closeEditModal();
+  // };
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-
+  
+    if (currentEditIndex === null) {
+      console.error('No book is selected for editing');
+      return;
+    }
+  
+    const bookToUpdate = { ...newBook, id: lendBooks[currentEditIndex].id };
+  
     try {
-      await axios.put(`http://localhost:5000/api/books/lendBooks/${newBook.id}`, newBook);
+      await axios.put(`http://localhost:5000/api/books/lendBooks/${bookToUpdate.id}`, bookToUpdate);
       fetchLendBooks();
       closeEditModal();
     } catch (error) {
-      console.error('Error editing book:', error);
+      console.error('Error editing book:', error.response ? error.response.data : error.message);
     }
-
-    const updatedLendBooks = lendBooks.map((book, i) =>
-      i === currentEditIndex ? newBook : book
-    );
-    setLendBooks(updatedLendBooks);
-    closeEditModal();
   };
+  
+
 
   return (
     <div className="App">

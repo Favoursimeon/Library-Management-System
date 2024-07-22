@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Sidebar from './Sidebar';
@@ -17,6 +17,22 @@ const Members = () => {
     address: '',
     dob: '',
   });
+
+  const fetchMembers = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/books/members/');
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+
+    }
+    };
+
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
 
   const handleShowModal = (edit = false, id = null) => {
     setEditMode(edit);
@@ -44,32 +60,63 @@ const Members = () => {
     setNewEntry({ ...newEntry, [name]: value });
   };
 
-  const handleAddEntry = () => {
-    if (editMode) {
-      setData(
-        data.map((entry) =>
-          entry.id === currentId ? { ...newEntry, id: currentId } : entry
-        )
-      );
-    } else {
-      setData([...data, { ...newEntry, id: data.length + 1 }]);
+  const handleAddEntry = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/books/members/', {
+        method: editMode ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEntry),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const result = await response.json();
+  
+      if (editMode) {
+        setData(
+          data.map((entry) =>
+            entry.id === currentId ? { ...newEntry, id: currentId } : entry
+          )
+        );
+      } else {
+        setData([...data, { ...newEntry, id: data.length + 1 }]);
+      }
+  
+      setNewEntry({
+        id: '',
+        fname: '',
+        lname: '',
+        email: '',
+        phone: '',
+        address: '',
+        dob: '',
+      });
+      setShowModal(false);
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error adding/updating entry:', error);
     }
-    setNewEntry({
-      id: '',
-      fname: '',
-      lname: '',
-      email: '',
-      phone: '',
-      address: '',
-      dob: '',
-    });
-    setShowModal(false);
-    setEditMode(false);
+  };
+  
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/books/members/${id}`, {
+        method: 'DELETE',
+      });
+  
+      setData(data.filter((entry) => entry.id !== id));
+    }
+    catch (error) {
+      console.error('Error deleting entry:', error);
+    }
   };
 
-  const handleDelete = (id) => {
-    setData(data.filter((entry) => entry.id !== id));
-  };
+ 
 
   return (
     <div className="Members">

@@ -110,7 +110,7 @@ const Books = () => {
             <tr>
               <th>Tittle</th>
               <th>Author</th>
-              <th>Producer</th>
+              <th>Production</th>
               <th>Price</th>
               <th>Quantity</th>
               <th>Category</th>
@@ -135,7 +135,7 @@ const Books = () => {
                     onClick={() => handleEditBook(index)}
                   >
                     Edit
-                  </Button>{' '}
+                  </Button>
                   <Button
                     variant="danger"
                     onClick={() => handleDeleteBook(book.id)}
@@ -176,7 +176,7 @@ const Books = () => {
             </Form.Group>
 
             <Form.Group controlId="formProducer">
-              <Form.Label>Producer</Form.Label>
+              <Form.Label>Production</Form.Label>
               <Form.Control
                 type="text"
                 name="producer"
@@ -237,7 +237,7 @@ const Books = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button  onClick={handleClose}>
             Close
           </Button>
           <Button variant="primary" onClick={handleAddBook}>

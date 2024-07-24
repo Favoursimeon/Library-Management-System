@@ -13,6 +13,7 @@ exports.getReturnedBooks = (req, res) => {
     res.json(returnedBooks);
   });
 };
+
 const formatDate = (date) => {
   const d = new Date(date);
   let month = '' + (d.getMonth() + 1);
@@ -22,7 +23,7 @@ const formatDate = (date) => {
   if (month.length < 2) month = '0' + month;
   if (day.length < 2) day = '0' + day;
 
-  return [month, day, year].join('-');
+  return [year, month, day].join('-'); // Correct format
 };
 
 exports.addLendBook = (req, res) => {
@@ -30,23 +31,20 @@ exports.addLendBook = (req, res) => {
   newBook.issueDate = formatDate(newBook.issueDate);
   newBook.returnDate = formatDate(newBook.returnDate);
   Reservation.addLendBook(newBook, (err, id) => {
-    if (err) res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: err.message });
     res.json({ id, ...newBook });
   });
 };
-
 
 exports.returnBook = (req, res) => {
   const book = req.body;
   book.issueDate = formatDate(book.issueDate);
   book.returnDate = formatDate(book.returnDate);
   Reservation.returnBook(book, (err, id) => {
-    if (err) res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: err.message });
     res.json({ id, ...book });
   });
 };
-
-
 exports.deleteLendBook = (req, res) => {
   const { id } = req.params;
   

@@ -12,16 +12,7 @@ const Login = ({ setIsAuthenticated }) => {
   console.log(email);
   console.log(password);  
 
-  // const handleLogin = (e) => {
-  //   e.preventDefault();
-  //   // Placeholder authentication logic
-  //   if (email === 'favour@gmail.com' && password === 'Admin123') {
-  //     setIsAuthenticated(true);
-  //     navigate('/dashboard');
-  //   } else {
-  //     alert('Invalid credentials');
-  //   }
-  // };
+  
 
   const handleLogin = async (e) => {
     e.preventDefault();

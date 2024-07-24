@@ -33,6 +33,7 @@ Member.updateMember = (member, callback) => {
     db.query('UPDATE members SET fname = ?, lname = ?, email = ?, phone = ?, address = ?, dob = ? WHERE id = ?', 
     [fname, lname, email, phone, address, dob, id], (err, results) => {
         if (err) {
+            console.error('Error updating member:', err);
         return callback(err, null);
         }
         return callback(null, results);

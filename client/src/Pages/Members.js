@@ -38,8 +38,12 @@ const Members = () => {
     setEditMode(edit);
     if (edit) {
       const entryToEdit = data.find((entry) => entry.id === id);
-      setNewEntry(entryToEdit);
-      setCurrentId(id);
+      if (entryToEdit) {
+        setNewEntry(entryToEdit);
+        setCurrentId(id);
+      } else {
+        console.error('Entry to edit not found:', id);
+      }
     } else {
       setNewEntry({
         id: '',
@@ -53,6 +57,7 @@ const Members = () => {
     }
     setShowModal(true);
   };
+
   const handleCloseModal = () => setShowModal(false);
 
   const handleChange = (e) => {
@@ -62,20 +67,21 @@ const Members = () => {
 
   const handleAddEntry = async () => {
     try {
+      const { id, ...entryWithoutId } = newEntry;
       const response = await fetch('http://localhost:5000/api/books/members/', {
         method: editMode ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newEntry),
+        body: JSON.stringify(entryWithoutId),
       });
-  
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-  
+
       const result = await response.json();
-  
+
       if (editMode) {
         setData(
           data.map((entry) =>
@@ -83,9 +89,9 @@ const Members = () => {
           )
         );
       } else {
-        setData([...data, { ...newEntry, id: data.length + 1 }]);
+        setData([...data, { ...newEntry, id: result.id }]);
       }
-  
+
       setNewEntry({
         id: '',
         fname: '',
@@ -101,6 +107,7 @@ const Members = () => {
       console.error('Error adding/updating entry:', error);
     }
   };
+  
   
 
   const handleDelete = async (id) => {
@@ -150,7 +157,7 @@ const Members = () => {
               <td>{entry.dob}</td>
               <td>
                 <Button
-                  variant="warning"
+                  
                   className="mr-2"
                   onClick={() => handleShowModal(true, entry.id)}
                 >

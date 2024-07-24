@@ -1,73 +1,56 @@
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
-  }
-  
-  table, th, td {
-    /* width: 50%; */
-    border: 1px solid #ddd;
-    font-size: small;
-    padding: 0% auto;
-    text-align: center;
-
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
 }
 
-h3{
-    margin-bottom: 20px;
-    font-family: Georgia, 'Times New Roman', Times, serif;
+table, th, td {
+  border: 1px solid #ddd;
+  font-size: small;
+  margin: 0 2px;
+  padding: 5px 5px;
 }
-  
-  th, td {
-    /* padding: 10px; */
-    text-align: left;
-  }
-  
-  th {
-    background-color: #8bb8e9;
-  }
-  
-  button {
-    margin: 5 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    width: 70px;
 
-  }
+th, td {
+  /* padding: 10px; */
+  text-align: center;
+}
 
-  tab{
-    margin: 5 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    width: 70px;
-    background-color: #4c9cf1;
-  }
-  
-  button:hover {
-    background-color: #ddd;
-  }
-  
-  .Modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    margin-right: -50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    background: white;
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  .Overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.75);
-  }
-  
+th {
+  background-color: #8bb8e9;
+}
+
+button {
+  margin: 0 2px;
+  padding: 5px 5px;
+  cursor: pointer;
+  width: 70px;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+.Modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+}

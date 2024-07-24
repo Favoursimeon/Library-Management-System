@@ -16,17 +16,24 @@ const getMemberById = (req, res) => {
 };
 
 const createMember = (req, res) => {
-  const newMember = req.body;
+  const { fname, lname, email, phone, address, dob } = req.body;
+  const newMember = { fname, lname, email, phone, address, dob }; // Exclude id
   db.query('INSERT INTO members SET ?', newMember, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error('Error inserting new member:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
     res.status(201).json({ id: results.insertId, ...newMember });
   });
 };
+
+
 
 const updateMember = (req, res) => {
   const { id } = req.params;
   const updatedMember = req.body;
   db.query('UPDATE members SET ? WHERE id = ?', [updatedMember, id], (err) => {
+    console.error('Error updating member:', err);
     if (err) return res.status(500).json({ error: err.message });
     res.json({ id, ...updatedMember });
   });
